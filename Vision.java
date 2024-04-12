@@ -1,116 +1,110 @@
 package org.firstinspires.ftc.teamcode;
-
 import android.util.Size;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.BuiltinCameraDirection;
+import com.qualcomm.robotcore.hardware.Servo;
+
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
-import java.util.List;
 
 @TeleOp
-@Disabled
 public class Vision extends LinearOpMode {
-    private static final boolean USE_WEBCAM = true;
-    private AprilTagProcessor aprilTag;
-    private VisionPortal visionPortal;
 
-    // OP INIT -----------------------------------------------------------------------
+    Servo servo;
+    double servopos = 0.0;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
 
-        initAprilTag();
+        servo = hardwareMap.servo.get("VisServo");
+        servo.setPosition(servopos);
 
-        telemetry.addData("DS preview on/off", "3 dots, Camera Stream");
-        telemetry.addData(">", "Touch Play to start OpMode");
-        telemetry.update();
-        waitForStart();
 
-        if (opModeIsActive()) {  // op mode started
-            while (opModeIsActive()) {
-
-                telemetryAprilTag();
-
-                telemetry.update();
-
-                if (gamepad1.dpad_down) {
-                    visionPortal.stopStreaming();
-                } else if (gamepad1.dpad_up) {
-                    visionPortal.resumeStreaming();
-                }
-
-                sleep(20);
-            }
-        }
-
-        visionPortal.close();
-
-    }
-    private void initAprilTag() {
-
-        // APRIL TAG SETTINGS --------------------------------------------------------
-
-        aprilTag = new AprilTagProcessor.Builder()
+        AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
 
                 .setDrawAxes(true)
                 .setDrawCubeProjection(true)
+                .setDrawTagID(true)
                 .setDrawTagOutline(true)
-
-
                 .build();
 
-        aprilTag.setDecimation(3);
+
+        VisionPortal visionPortal = new VisionPortal.Builder()
+
+                .addProcessor(tagProcessor)
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(640, 480))
+                .build();
 
 
-        // VISION SETTINGS -----------------------------------------------------------
+        waitForStart();
 
-        VisionPortal.Builder builder = new VisionPortal.Builder();
+        while (!isStopRequested() && opModeIsActive()){
+
+            if (tagProcessor.getDetections().size() > 0){
+
+                AprilTagDetection tag = tagProcessor.getDetections().get(0);
+
+                if(tag.id == 0){ // TAG #0 -----------------------------------
+                    telemetry.addData("tagid 0 : ", 0);
+                }if(tag.id != 0){
+                    telemetry.addData("tagid 0 : ", "Not Visible");
+                }
+
+                telemetry.addLine();
+
+                if(tag.id == 1){ // TAG #1 -----------------------------------
+                    telemetry.addData("tagid 1 : ", 1);
+                }if(tag.id != 1){
+                    telemetry.addData("tagid 1 : ", "Not Visible");
+                }
+
+                telemetry.addLine();
+
+                if(tag.id == 2){ // TAG #2 -----------------------------------
+                    telemetry.addData("tagid 2 : ", 2);
+                }if(tag.id != 2){
+                    telemetry.addData("tagid 2 : ", "Not Visible");
+                }
+
+                telemetry.addLine();
+
+                if(tag.id == 3){ // TAG #3 -----------------------------------
+                    telemetry.addData("tagid 3 : ", 3);
+                }if(tag.id != 3){
+                    telemetry.addData("tagid 3 : ", "Not Visible");
+                }
 
 
-        if (USE_WEBCAM) {
-            builder.setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"));
-        } else {
-            builder.setCamera(BuiltinCameraDirection.BACK);
+                //------------------------------------------------------------
+
+
+
+                if(tag.id == 0){
+                servopos = .5;
+                servo.setPosition(servopos);
+                } else{
+                    servopos = 0;
+                    servo.setPosition(servopos);
+                }
+
+
+            }
+
+            telemetry.update();
         }
 
-        builder.setCameraResolution(new Size(640, 480));
 
-        builder.enableLiveView(true);
 
-        builder.setStreamFormat(VisionPortal.StreamFormat.YUY2);
 
-        builder.setAutoStopLiveView(false);
 
-        builder.addProcessor(aprilTag);
 
-        visionPortal = builder.build();
-
-        visionPortal.setProcessorEnabled(aprilTag, true);
 
     }
-
-
-    // APRIL TAG TELEMETRY ----------------------------------------------------------
-    private void telemetryAprilTag() {
-
-        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
-        telemetry.addData("# AprilTags Detected", currentDetections.size());
-
-        telemetry.update();
-
-
-
-
-
-
-
-    }   // end method telemetryAprilTag()
-
-}   // end class
+        }
 
 
