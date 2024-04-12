@@ -1,0 +1,108 @@
+package org.firstinspires.ftc.teamcode;
+import android.util.Size;
+
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+
+@TeleOp
+public class Vision extends LinearOpMode {
+
+    Servo servo;
+    double servopos = 0.0;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+
+        servo = hardwareMap.servo.get("VisServo");
+        servo.setPosition(servopos);
+
+
+        AprilTagProcessor tagProcessor = new AprilTagProcessor.Builder()
+
+                .setDrawAxes(true)
+                .setDrawCubeProjection(true)
+                .setDrawTagID(true)
+                .setDrawTagOutline(true)
+                .build();
+
+
+        VisionPortal visionPortal = new VisionPortal.Builder()
+
+                .addProcessor(tagProcessor)
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setCameraResolution(new Size(640, 480))
+                .build();
+
+
+        waitForStart();
+
+        while (!isStopRequested() && opModeIsActive()){
+
+            if (tagProcessor.getDetections().size() > 0){
+
+                AprilTagDetection tag = tagProcessor.getDetections().get(0);
+
+                if(tag.id == 0){ // TAG #0 -----------------------------------
+                    telemetry.addData("tagid 0 : ", 0);
+                }if(tag.id != 0){
+                    telemetry.addData("tagid 0 : ", "Not Visible");
+                }
+
+                telemetry.addLine();
+
+                if(tag.id == 1){ // TAG #1 -----------------------------------
+                    telemetry.addData("tagid 1 : ", 1);
+                }if(tag.id != 1){
+                    telemetry.addData("tagid 1 : ", "Not Visible");
+                }
+
+                telemetry.addLine();
+
+                if(tag.id == 2){ // TAG #2 -----------------------------------
+                    telemetry.addData("tagid 2 : ", 2);
+                }if(tag.id != 2){
+                    telemetry.addData("tagid 2 : ", "Not Visible");
+                }
+
+                telemetry.addLine();
+
+                if(tag.id == 3){ // TAG #3 -----------------------------------
+                    telemetry.addData("tagid 3 : ", 3);
+                }if(tag.id != 3){
+                    telemetry.addData("tagid 3 : ", "Not Visible");
+                }
+
+
+                //------------------------------------------------------------
+
+
+
+                if(tag.id == 0){
+                servopos = .5;
+                servo.setPosition(servopos);
+                } else{
+                    servopos = 0;
+                    servo.setPosition(servopos);
+                }
+
+
+            }
+
+            telemetry.update();
+        }
+
+
+
+
+
+
+
+    }
+        }
